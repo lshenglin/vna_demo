@@ -1,4 +1,5 @@
 # This script does not control turntable. It takes VNA measurment and displays measured angle and range on GUI
+# Added sounds feature plays when aligned with target and lost alignment
 import rohde_znb as rs
 import LT360 as tt
 import sys
@@ -8,6 +9,9 @@ from datetime import datetime
 from socket import *
 import errno
 import math
+import Tkinter
+import subprocess
+
 
 version = sys.hexversion
 if version >= 0x020600F0 and version < 0x03000000 :
@@ -41,8 +45,11 @@ class GUI_Toplevel:
         self.corrected_phase_delta = 0
         self.show_phase=0
         self.matlab_call_cnt = 0
+        self.past_angle_1 = 180
+        self.past_angle_2 = 180
+        self.alarm_threshold=2
 
-        self.show_corrected_phase_delta = 0
+        self.show_corrected_phase_delta = 1
         if self.show_corrected_phase_delta:
             self.show_phase = 0
         # Set background of toplevel window to match
@@ -146,13 +153,22 @@ class GUI_Toplevel:
         #     self.change_bg_color('red')
         # else:
 
+        # Updates angle in GUI and change window background color to green if point towards target (<3 degrees)
+        # And plays a sounds if point to target
         self.label3.configure(text=("%3d" % (self.angle-self.angle_calibration)+u'\xb0'))
         if (self.angle-self.angle_calibration) < 4 and (self.angle-self.angle_calibration) > -4:
             # self.label5.configure(background="green")
             self.change_bg_color('green')
+            if  (abs(self.angle-self.angle_calibration))<4 and (abs(self.past_angle_1-self.angle_calibration)) > self.alarm_threshold and (abs(self.past_angle_2-self.angle_calibration)) >self.alarm_threshold:
+                # root.bell()
+                subprocess.call(["afplay", "beep_good.wav"])
+                self.alarm_threshold = self.alarm_threshold + 1
         else:
             # self.label5.configure(background="red")
             self.change_bg_color('ivory')
+            if (abs(self.angle - self.angle_calibration)) > self.alarm_threshold and (abs(self.past_angle_1-self.angle_calibration)) < self.alarm_threshold and (abs(self.past_angle_2-self.angle_calibration)) <self.alarm_threshold:
+                subprocess.call(["afplay", "beep_bad.wav"])
+                self.alarm_threshold =4
 
     def change_bg_color(self,color):
         root.configure(background=color)
@@ -261,6 +277,8 @@ def update_estimate():
     #     mlab.start()
 
     # res = mlab.run_func('/Users/shenglinli/Documents/R1_script/analyze_results_test.m', res_file)
+    w.past_angle_2 = w.past_angle_1
+    w.past_angle_1 = w.angle
     [w.angle,w.range,w.phase_ant1,w.phase_ant2,w.corrected_phase_delta] = eng.analyze_results_test_m_engin(res_file,nargout=5)
     # w.angle=t[0]
     # w.range=t[1]

@@ -20,7 +20,7 @@ else
   M = [ang_val * ones(size(M, 1), 1) M];
   angle_candidate = M(:, 1);
 end
-Nrx = 3;
+Nrx = 2;
 
 cnt = 1;
 % loop over each angle and construct time domain response
@@ -34,7 +34,7 @@ for a = ang.'
   % extract frequency response between 3GHz to 8GHz
   hrx_f(:, 1) = raw_data(:, 2) + j*raw_data(:, 3);
   hrx_f(:, 2) = raw_data(:, 4) + j*raw_data(:, 5);
-  hrx_f(:, 3) = raw_data(:, 6) + j*raw_data(:, 7);
+%   hrx_f(:, 3) = raw_data(:, 6) + j*raw_data(:, 7);
   
   % Mask the frequency domain response to be capturing the center 500MHz BW
   if 0

@@ -38,8 +38,11 @@ def vna(paras=default_paras):
 		file_name = 'Sparameter_' + timestamp + '.csv'
 		res_file = os.path.expanduser(paras['save_location']) + file_name
 		output=open(res_file,'w')
-		tr_name = ['CH1Tr1','CH1Tr2','CH1Tr3']
-		meas_obj = ['S14','S24','S34']
+		# tr_name = ['CH1Tr1','CH1Tr2','CH1Tr3']
+		# meas_obj = ['S14','S24','S34']
+
+		tr_name = ['CH1Tr1', 'CH1Tr2']
+		meas_obj = ['S14', 'S24']
 		znb = rs.spawn('10.0.1.88')
 		try:
 			lt = tt.spawn(ipAddr='10.0.1.253',port =9001)
